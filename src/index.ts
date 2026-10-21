@@ -1,9 +1,11 @@
-import { app } from "./http.js";
+import { createApp } from "./app.js";
+import { env } from "./config/env.js";
 
-// On Vercel the exported app is used as a serverless function; locally we listen on a port.
-if (!process.env.VERCEL) {
-  const port = Number(process.env.PORT) || 4000;
-  app.listen(port, () => console.log(`API listening on http://localhost:${port}`));
+const app = createApp();
+
+// On Vercel the exported app runs as a serverless function; elsewhere (local, Render) we listen on a port.
+if (!env.isServerless) {
+  app.listen(env.port, () => console.log(`API listening on http://localhost:${env.port}`));
 }
 
 export default app;

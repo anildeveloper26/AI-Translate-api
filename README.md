@@ -64,10 +64,28 @@ Import this repo into Vercel. It detects Express and serves `src/index.ts` as a 
 
 ```
 src/
-  index.ts                 # entry: exports the app (Vercel) / listens on PORT locally
-  http.ts                  # express app: CORS, JSON, routes, error handling
-  routes/transcriptions.ts # CRUD + search
-  routes/live.ts           # Gemini Live ephemeral token endpoint
-  lib/db.ts                # pg pool + schema bootstrap
-  lib/validate.ts          # request validation
+  index.ts                      # entry: listens on PORT (or exports the app on Vercel)
+  app.ts                        # createApp(): CORS, JSON, routes, error handling
+  config/env.ts                 # typed environment config
+  routes/                       # URL → controller mapping only
+    index.ts
+    transcription.routes.ts
+    live.routes.ts
+  controllers/                  # HTTP layer: parse request, call service, send response
+    transcription.controller.ts
+    live.controller.ts
+    health.controller.ts
+  services/                     # business logic + data access
+    transcription.service.ts    # SQL (parameterised) for CRUD + search
+    live.service.ts             # Gemini Live ephemeral token minting
+  validators/
+    transcription.validator.ts  # request validation, throws 400s
+  middlewares/
+    errorHandler.ts             # 404 + central error handler
+    rateLimit.ts                # per-IP limiter for the token endpoint
+  db/
+    pool.ts                     # pg pool + lazy schema bootstrap
+    schema.ts                   # CREATE TABLE / indexes
+  types/transcription.ts        # shared domain types
+  utils/httpError.ts            # HttpError with status helpers
 ```
