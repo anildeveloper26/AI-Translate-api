@@ -2,6 +2,8 @@
 
 Express backend for **AI Translate**, a real-time multilingual (Hindi + English) speech-to-text app.
 
+- **Live API:** https://ai-translate-api-mwbj.onrender.com/api/health (Render)
+- **Live app:** https://ai-translate-mu.vercel.app
 - **Frontend repo:** https://github.com/anildeveloper26/AI-Translate
 - **Stack:** Node.js, Express 5, TypeScript, PostgreSQL (`pg`), Google Gemini Live (`@google/genai`)
 
@@ -56,9 +58,10 @@ npm run dev            # http://localhost:4000
 | `CORS_ORIGIN` | yes in prod | Allowed frontend origin(s), comma-separated |
 | `GEMINI_LIVE_MODEL` | no | Defaults to `gemini-3.5-transcribe-live` |
 
-## Deploy (Vercel)
+## Deploy
 
-Import this repo into Vercel. It detects Express and serves `src/index.ts` as a serverless function. Add the environment variables above, with `CORS_ORIGIN` set to the deployed frontend URL.
+- **Render (current):** build `npm install && npm run build`, start `npm start`, and add the environment variables above.
+- **Vercel (alternative):** import the repo. It detects Express and serves `src/index.ts` as a serverless function.
 
 ## Project structure
 
