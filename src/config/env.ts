@@ -12,5 +12,5 @@ export const env = {
   databaseUrl: process.env.DATABASE_URL ?? "",
   geminiApiKey: process.env.GEMINI_API_KEY ?? "",
   geminiLiveModel: process.env.GEMINI_LIVE_MODEL || "gemini-3.5-transcribe-live",
-  corsOrigins: list(process.env.CORS_ORIGIN, "http://localhost:5173"),
+  corsOrigins: list(process.env.CORS_ORIGIN, "http://localhost:5173,https://ai-translate-mu.vercel.app"),
 } as const;
