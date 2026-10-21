@@ -1,0 +1,73 @@
+# AI Translate API
+
+Express backend for **AI Translate**, a real-time multilingual (Hindi + English) speech-to-text app.
+
+- **Frontend repo:** https://github.com/anildeveloper26/AI-Translate
+- **Stack:** Node.js, Express 5, TypeScript, PostgreSQL (`pg`), Google Gemini Live (`@google/genai`)
+
+## What it does
+
+1. **Transcription history (CRUD):** stores transcriptions in PostgreSQL. The table is created automatically on first use.
+2. **Gemini Live tokens:** mints short-lived, single-use **ephemeral tokens** locked to the `gemini-3.5-transcribe-live` model. The browser streams microphone audio straight to Gemini Live with one of these tokens, so the real API key never leaves the server.
+
+## API
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/health` | Health check and config status |
+| `GET` | `/api/transcriptions?q=&limit=&offset=` | List and search transcriptions (title + content) |
+| `GET` | `/api/transcriptions/:id` | Get one transcription |
+| `POST` | `/api/transcriptions` | Create `{ content, title?, language?, engine?, duration_ms? }` |
+| `PATCH` | `/api/transcriptions/:id` | Update `{ title?, content?, language? }` |
+| `DELETE` | `/api/transcriptions/:id` | Delete (204) |
+| `POST` | `/api/live/token` | Mint a Gemini Live ephemeral token `{ token, model }` (rate-limited per IP) |
+
+Every input is validated, every SQL query is parameterised, CORS is restricted to the configured frontend origins, and JSON bodies are capped at 100 KB.
+
+### Schema
+
+```sql
+CREATE TABLE transcriptions (
+  id          SERIAL PRIMARY KEY,
+  title       TEXT NOT NULL DEFAULT 'Untitled',
+  content     TEXT NOT NULL,
+  language    TEXT NOT NULL DEFAULT 'hi-IN',
+  engine      TEXT NOT NULL DEFAULT 'gemini',   -- 'gemini' | 'browser'
+  duration_ms INTEGER NOT NULL DEFAULT 0,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+```
+
+## Run locally
+
+```bash
+npm install
+cp .env.example .env   # fill in DATABASE_URL and GEMINI_API_KEY
+npm run dev            # http://localhost:4000
+```
+
+## Environment variables
+
+| Name | Required | Description |
+|---|---|---|
+| `DATABASE_URL` | yes | PostgreSQL connection string (e.g. Neon pooled URL) |
+| `GEMINI_API_KEY` | yes | Google AI Studio API key |
+| `CORS_ORIGIN` | yes in prod | Allowed frontend origin(s), comma-separated |
+| `GEMINI_LIVE_MODEL` | no | Defaults to `gemini-3.5-transcribe-live` |
+
+## Deploy (Vercel)
+
+Import this repo into Vercel. It detects Express and serves `src/index.ts` as a serverless function. Add the environment variables above, with `CORS_ORIGIN` set to the deployed frontend URL.
+
+## Project structure
+
+```
+src/
+  index.ts                 # entry: exports the app (Vercel) / listens on PORT locally
+  http.ts                  # express app: CORS, JSON, routes, error handling
+  routes/transcriptions.ts # CRUD + search
+  routes/live.ts           # Gemini Live ephemeral token endpoint
+  lib/db.ts                # pg pool + schema bootstrap
+  lib/validate.ts          # request validation
+```
